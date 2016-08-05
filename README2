@@ -1,0 +1,16 @@
+Dec 2014
+
+
+Start this as a root user since it uses the privileged port 23 (telnet).  
+It only simulates the port reset functionality.  Login and password aren't
+actually authenticated... they just match what you would see when logging 
+into an actual Digi.
+
+I will add it to the /etc/init.d/rc2.d directory so that it starts on boot.
+
+Current config:
+Simulated Digi interface: telnet localhost 23
+ser2net interface: telnet localhost 2000
+
+
+sean.rendell@windriver.com 

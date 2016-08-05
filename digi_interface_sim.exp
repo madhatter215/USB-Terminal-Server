@@ -1,0 +1,102 @@
+#!/usr/bin/expect
+
+#set timeout 5;
+set timeout 60;
+set username "root";
+set password "dbps";
+
+set ser2net_host "localhost";
+set ser2net_admin_port 2000;
+
+global spawn_id;
+global old_spawn_id;
+
+# simulate the Digi login prompt
+puts -nonewline "\r\nlogin: "
+
+
+expect {
+    # if we get the username, send the password prompt
+    "root\r" {
+	send "password: "
+	# turn off the echo... just to simulate a non-echoing password field
+	#stty -echo
+	exp_continue;
+    }
+    # if we get a password, send a prompt
+    "$password\r" {
+	send "#> ";
+	# and turn echoing back on! :)
+	#stty echo
+	exp_continue;
+    }
+    -regexp "kill tty=\[0-9]+\r" {
+	set old_timeout $timeout;
+	set timeout 2;
+	
+	# get the TCP port number
+	set unparsed $expect_out(buffer);
+	set parsed [ split $unparsed = ];
+	set port [ expr "2000 + [lindex $parsed 1]" ];
+	
+	# save our spawn_id for later
+#	set old_spawn_id $spawn_id;
+
+
+	# now lets try to connect to our local ser2net admin interface at port $ser2net_admin_port
+	spawn -noecho telnet $ser2net_host $ser2net_admin_port;
+	send -i $spawn_id "disconnect $port\r";
+	sleep .1;
+
+	close $spawn_id
+	
+	# reset our expect handle
+	set spawn_id exp0;
+
+	set timeout $old_timeout;
+	# exit this expect loop
+    }
+    # in case someone actually telnets to us and tries to exit
+    -re "quit\r" {
+	exit;
+    }
+    # in case someone actually telnets to us and tries to exit
+    -re "exit\r" {
+	exit;
+    }
+    # a blank line gives another prompt
+    -re "\^\r\n" {
+	send "#> ";
+	exp_continue;
+    }
+    "\n" {
+	# ignore newlines
+	exp_continue;
+    }
+#    timeout {
+#	send "We timed out!\r\n"
+#	# try starting the date command to see if it works
+#	#spawn /bin/date;
+#	exp_continue;
+#    }
+    -re . {
+	exp_continue;
+    }
+    eof {
+	exit;
+    }
+}
+
+## print some Digi fakery #
+#expect *;
+
+send "Task(s) logged out.";
+send "\r\n";
+send "#> ";
+
+
+expect "exit\r";
+
+
+exit;
+
