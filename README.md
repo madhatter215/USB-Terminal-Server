@@ -23,6 +23,6 @@ Requirements:
 
 Instructions:
 ==============
-Follow the PowerPoint to determine your tree topology and and setup udev rules for USB port mapping
-Test rules and console using Minicom (with IoT Arduino board for testing serial output)
+- Follow the PowerPoint to determine your tree topology and and setup udev rules for USB port mapping
+- Test rules and console using Minicom (with IoT Arduino board for testing serial output)
 Ser2Net and VLM integration
